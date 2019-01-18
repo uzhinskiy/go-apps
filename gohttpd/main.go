@@ -96,15 +96,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
         file := checkFileExist(base, r)
 
+	if Config["mode"]=="html" && file=="/" {
+	    file = "/index.html"
+	}
+
+
         fi, err := os.Lstat(base + file)
 
         if err != nil {
                 w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
                 w.Header().Set("Server", Config["version"])
-                bytes := []byte(err.Error())
+                er_msg := []byte(err.Error())
                 code = 404
                 w.WriteHeader(code)
-                w.Write(bytes)
+                w.Write(er_msg)
 
                 log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
         } else {
