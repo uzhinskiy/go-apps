@@ -20,7 +20,7 @@
     version=gohttpd v0.3
 
     # Абсолютный путь к корневому каталогу
-    document_root=/export/htdocs/GOHTTPD
+    document_root=/var/www
 
     # Абсолютный путь к LOG-файлу
     log_file=/tmp/http_access.log
