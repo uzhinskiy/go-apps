@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"html"
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
@@ -113,10 +113,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 	} else {
-
-		body, _ := ioutil.ReadAll(r.Body)
-		log.Printf("%s", body)
-		defer r.Body.Close()
+		/*
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("%s", body)
+			defer r.Body.Close()
+		*/
 
 		switch mode := fi.Mode(); {
 		case mode.IsRegular():
@@ -132,7 +133,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			}
 
 			w.Header().Set("Content-Type", contentType)
-		        w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Server", Config["version"])
 
 			log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
@@ -157,30 +158,36 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Fprintf(w, "<tr><td colspan='3'><hr></td></tr><tr><td colspan='3'>"+Config["version"]+"</td></tr></table></body></html>")
 		case mode&os.ModeSymlink != 0:
-			ln,err := os.Readlink(base+file)
-			if err!=nil {
-			    w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
-			    w.Header().Set("Server", Config["version"])
-			    er_msg := []byte(err.Error())
-			    code = 404
-			    w.WriteHeader(code)
-			    w.Write(er_msg)
-			    log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
+			ln, err := os.Readlink(base + file)
+			var bytes []byte
+			if err != nil {
+				w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+				w.Header().Set("Server", Config["version"])
+				er_msg := []byte(err.Error())
+				code = 404
+				w.WriteHeader(code)
+				w.Write(er_msg)
+				log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 			}
-			ln_fi,_ := os.Lstat(base+"/"+ln)
-			bytes, err := getFile(base+"/"+ln, ln_fi.Size())
-
+			ln_fi, err := os.Lstat(base + "/" + ln)
 			if err != nil {
 				bytes = []byte(err.Error()) //fmt.Fprintf(w, "%d\t%s", 400, err.Error())
 				code = 403
 				contentType = "text/plain; charset=UTF-8"
 			} else {
-				code = http.StatusOK
-				contentType = mime.TypeByExtension(path.Ext(ln))
-			}
+				bytes, err = getFile(base+"/"+ln, ln_fi.Size())
 
+				if err != nil {
+					bytes = []byte(err.Error()) //fmt.Fprintf(w, "%d\t%s", 400, err.Error())
+					code = 403
+					contentType = "text/plain; charset=UTF-8"
+				} else {
+					code = http.StatusOK
+					contentType = mime.TypeByExtension(path.Ext(ln))
+				}
+			}
 			w.Header().Set("Content-Type", contentType)
-		        w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Server", Config["version"])
 
 			log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
@@ -216,6 +223,7 @@ func checkFileExist(base string, r *http.Request) string {
 
 func getFile(fname string, size int64) ([]byte, error) {
 	respFile, err := os.OpenFile(fname, os.O_RDONLY, 0)
+
 	defer respFile.Close()
 	if err != nil {
 		return nil, err
