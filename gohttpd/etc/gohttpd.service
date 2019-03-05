@@ -1,0 +1,13 @@
+[Unit] 
+Description=Static httpd server
+After=network.target
+
+[Service] 
+Type=simple
+TimeoutStartSec=60
+ExecStart=/usr/local/sbin/gohttpd -config /usr/local/etc/gohttpd.cfg
+ExecStop=/bin/kill -3 $MAINPID
+Restart=always 
+
+[Install]
+WantedBy=multi-user.target
