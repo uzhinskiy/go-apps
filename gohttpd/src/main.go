@@ -159,6 +159,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "<tr><td colspan='3'><hr></td></tr><tr><td colspan='3'>"+Config["version"]+"</td></tr></table></body></html>")
 		case mode&os.ModeSymlink != 0:
 			ln, err := os.Readlink(base + file)
+fmt.Println(ln)
 			var bytes []byte
 			if err != nil {
 				w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
@@ -169,13 +170,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 				w.Write(er_msg)
 				log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 			}
-			ln_fi, err := os.Lstat(base + "/" + ln)
+			// ln_fi, err := os.Lstat(base + "/" + ln)
+			ln_fi, err := os.Lstat(ln)
 			if err != nil {
 				bytes = []byte(err.Error()) //fmt.Fprintf(w, "%d\t%s", 400, err.Error())
 				code = 404
 				contentType = "text/plain; charset=UTF-8"
 			} else {
-				bytes, err = getFile(base+"/"+ln, ln_fi.Size())
+				bytes, err = getFile(ln, ln_fi.Size())
 
 				if err != nil {
 					bytes = []byte(err.Error()) //fmt.Fprintf(w, "%d\t%s", 400, err.Error())
