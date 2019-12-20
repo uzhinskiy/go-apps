@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/uzhinskiy/lib.go/helpers"
 	"github.com/uzhinskiy/lib.go/pconf"
 )
 
@@ -37,7 +38,7 @@ func init() {
 
 func main() {
 	sconn, err := net.ListenUDP("udp", &net.UDPAddr{
-		Port: appConfig["fromport"],
+		Port: helpers.Atoi(appConfig["fromport"]),
 		IP:   net.ParseIP(appConfig["input"]),
 	})
 	defer sconn.Close()

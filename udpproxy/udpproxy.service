@@ -1,0 +1,13 @@
+[Unit] 
+Description=Simple UDP-proxy
+After=network.target
+
+[Service] 
+Type=simple
+TimeoutStartSec=60
+ExecStart=/usr/local/sbin/udpproxy -config /usr/local/etc/updproxy.cfg
+ExecStop=/bin/kill -3 $MAINPID
+Restart=always 
+
+[Install]
+WantedBy=multi-user.target
